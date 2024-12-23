@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Converter</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
     <style>
         body {
             display: flex;
@@ -74,13 +74,39 @@
             border: 1px solid #ddd;
             margin-top: 10px;
         }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .input-group:hover .tooltip {
+            display: block;
+        }
+
+        .instructions {
+            display: none;
+            margin-top: 20px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="converter">
         <h1>Color Converter</h1>
 
-        <div class="input-group">
+        <div class="input-group" onmouseover="showTooltip('format1')" onmouseout="hideTooltip()">
             <label for="format1">Select the input color format:</label>
             <select id="format1" onchange="updatePlaceholder()">
                 <option value="hex">HEX</option>
@@ -88,11 +114,12 @@
                 <option value="hsl">HSL</option>
                 <option value="cmyk">CMYK</option>
             </select>
+            <div class="tooltip" id="tooltip"></div>
         </div>
 
         <div class="input-group">
             <label for="colorInput">Enter the color value:</label>
-            <input type="text" id="colorInput" placeholder="e.g., #FF5733 or rgb(255,87,51)">
+            <input type="text" id="colorInput" placeholder="e.g., #FF5733 or 255,87,51 or etc">
         </div>
 
         <div class="input-group">
@@ -106,25 +133,23 @@
         </div>
 
         <button onclick="convertColor()">Convert</button>
+        <button onclick="toggleInstructions()">How to Use</button>
 
         <div class="result" id="result">Result will appear here</div>
         <div class="color-preview" id="colorPreview"></div>
+
+        <div class="instructions" id="instructions">
+            <h2>How to Use:</h2>
+            <ol>
+                <li>Select the input color format (e.g., HEX, RGB, HSL, CMYK).</li>
+                <li>Enter the color value in the specified format (e.g., #FF5733 for HEX).</li>
+                <li>Select the output color format you want to convert to.</li>
+                <li>Click the <strong>Convert</strong> button to see the result.</li>
+                <li>The result will appear below, and the color preview box will show the converted color.</li>
+            </ol>
+        </div>
     </div>
 
-    <script>
-        function updatePlaceholder() {
-            const format = document.getElementById("format1").value;
-            const placeholderMap = {
-                hex: "e.g., #FF5733",
-                rgb: "e.g., rgb(255, 87, 51)",
-                hsl: "e.g., hsl(360, 100%, 50%)",
-                cmyk: "e.g., cmyk(0, 66, 80, 0)"
-            };
-            document.getElementById("colorInput").placeholder = placeholderMap[format] || "Enter color value";
-        }
-
-        updatePlaceholder();
-    </script>
-    <script src="script.js"></script>
 </body>
 </html>
+ㅍ
