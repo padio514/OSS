@@ -1,31 +1,37 @@
 function convertColor() {
     const format1 = document.getElementById("format1").value;
-    const colorInput = document.getElementById("colorInput").value;
+    const colorInput = document.getElementById("colorInput").value.trim();
     const format2 = document.getElementById("format2").value;
 
     let intermediateRgb;
     let result;
 
     try {
-        // Step 1: Convert input to RGB
+        // Validate input color
+        validateColorInput(format1, colorInput);
+
+        //input to RGB
         switch (format1) {
             case "hex":
                 intermediateRgb = hexToRgb(colorInput);
                 break;
             case "rgb":
-                intermediateRgb = colorInput;
+                const [r, g, b] = colorInput.split(",").map(Number);
+                intermediateRgb = `rgb(${r}, ${g}, ${b})`;
                 break;
             case "hsl":
-                intermediateRgb = hslToRgb(colorInput);
+                const [h, s, l] = colorInput.split(",").map(Number);
+                intermediateRgb = hslToRgb(`hsl(${h}, ${s}%, ${l}%)`);
                 break;
             case "cmyk":
-                intermediateRgb = cmykToRgb(colorInput);
+                const [c, m, y, k] = colorInput.split(",").map(Number);
+                intermediateRgb = cmykToRgb(`cmyk(${c}, ${m}, ${y}, ${k})`);
                 break;
             default:
                 throw new Error("Unsupported input format.");
         }
 
-        // Step 2: Convert RGB to target format
+        //RGB to outbut format
         switch (format2) {
             case "hex":
                 result = rgbToHex(intermediateRgb);
@@ -53,6 +59,7 @@ function convertColor() {
         document.getElementById("colorPreview").style.backgroundColor = "transparent";
     }
 }
+
 
 function hexToRgb(hex) {
     const bigint = parseInt(hex.slice(1), 16);
@@ -131,3 +138,86 @@ function cmykToRgb(cmyk) {
     const b = Math.round(255 * (1 - y) * (1 - k));
     return `rgb(${r}, ${g}, ${b})`;
 }
+
+const tooltips = {
+    hex: "HEX: A hexadecimal color code in the format #RRGGBB. Each component (R, G, B) is a two-digit hexadecimal number (00 to FF).",
+    rgb: "RGB: A color in the format rgb(R, G, B). Each component (R, G, B) is a decimal number (0 to 255).",
+    hsl: "HSL: A color in the format hsl(H, S%, L%). H (hue) is 0-360, S (saturation) and L (lightness) are percentages.",
+    cmyk: "CMYK: A color in the format cmyk(C, M, Y, K). Each component (Cyan, Magenta, Yellow, Black) is a percentage (0-100)."
+};
+
+function updatePlaceholder() {
+    const format = document.getElementById("format1").value;
+    const placeholderMap = {
+        hex: "e.g., #FF5733",
+        rgb: "e.g., 255,87,51",
+        hsl: "e.g., 360,100,50",
+        cmyk: "e.g., 0,66,80,0"
+    };
+    document.getElementById("colorInput").placeholder = placeholderMap[format] || "Enter color value";
+}
+
+function showTooltip(id) {
+    const format = document.getElementById(id).value;
+    const tooltip = document.getElementById("tooltip");
+    tooltip.textContent = tooltips[format] || "No description available.";
+    const element = document.getElementById(id);
+    const rect = element.getBoundingClientRect();
+    tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
+    tooltip.style.top = `${rect.top + window.scrollY - 30}px`;
+}
+
+function hideTooltip() {
+    const tooltip = document.getElementById("tooltip");
+    tooltip.textContent = "";
+    tooltip.style.left = "-9999px";
+    tooltip.style.top = "-9999px";
+}
+
+function toggleInstructions() {
+    const instructions = document.getElementById("instructions");
+    instructions.style.display = instructions.style.display === "none" || instructions.style.display === "" ? "block" : "none";
+}
+
+updatePlaceholder();
+
+function validateColorInput(format, value) {
+    switch (format) {
+        case "hex":
+            if (!/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                throw new Error("Invalid HEX format. Use #RRGGBB.");
+            }
+            break;
+        case "rgb":
+            const rgbMatch = value.split(",").map(Number);
+            if (rgbMatch.length !== 3 || rgbMatch.some(num => isNaN(num) || num < 0 || num > 255)) {
+                throw new Error("Invalid RGB format. Use R,G,B where R, G, and B are 0-255.");
+            }
+            break;
+        case "hsl":
+            const hslMatch = value.split(",").map(Number);
+            if (
+                hslMatch.length !== 3 ||
+                hslMatch[0] < 0 || hslMatch[0] > 360 ||
+                hslMatch[1] < 0 || hslMatch[1] > 100 ||
+                hslMatch[2] < 0 || hslMatch[2] > 100
+            )
+            {
+                throw new Error("Invalid HSL format. Use H,S,L where H=0-360, S=0-100, L=0-100.");
+            }
+            break;
+        case "cmyk":
+            const cmykMatch = value.split(",").map(Number);
+            if (
+                cmykMatch.length !== 4 ||
+                cmykMatch.some(num => isNaN(num) || num < 0 || num > 100)
+            )
+            {
+                throw new Error("Invalid CMYK format. Use C,M,Y,K where C, M, Y, K are 0-100.");
+            }
+            break;
+        default:
+            throw new Error("Unsupported color format.");
+    }
+}
+
